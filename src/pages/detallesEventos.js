@@ -24,6 +24,7 @@ const DetallesEventos = () => {
             <Navbar />
             {evento == null ? <h1>No se ha encontrado el evento</h1> : 
             <div className="card bg-gray col-md-6 eventos">
+                <img src={evento.imagen} className="card-img-top" alt="..." />
                 <h3>Nombre del evento: {evento.nombre}</h3>
                 <p>Organizador: {evento.organizador}</p>
                 <p>Fecha: {evento.timestamp}</p>

@@ -20,17 +20,21 @@ const CrearEvento = () => {
         var fecha = document.getElementById("fecha").value;
         var hora = document.getElementById("hora").value;
         var organizador = localStorage.getItem("email");
-        var imagenes = document.getElementById("imagenes").value;
+        var imagenes = document.getElementById("imagenes").files;
 
-        const cloudinaryUploadPromises = Array.from(imagenes).map((imagen) => {
+        const cloudinaryUploadPromises = Array.from(imagenes).map(async (imagen) => {
             const formData = new FormData();
             formData.append('imagen', imagen);
 
             // Devolvemos la promesa de la subida de la imagen
-            return axios.post('http://localhost:5001/subir', formData)
-                .then((response) => response.data.secure_url);
+            return axios.post('http://localhost:5001/cloud/subir', formData).then((response) => {
+                console.log(response.data);
+                return response.data.imageUrl;
+            });
+
 
         });
+        console.log(cloudinaryUploadPromises);
 
         axios.get("https://nominatim.openstreetmap.org/search?q=" + lugar + "&format=json&polygon=1&addressdetails=1").then(async (response) => {
             if (response.data.length == 0) {
@@ -41,7 +45,8 @@ const CrearEvento = () => {
             var longitud = response.data[0].lon;
 
             Promise.all(cloudinaryUploadPromises)
-                .then(async (imagenes) => {
+                .then(async (imagenesRL) => {
+                    console.log(imagenesRL);
                     var url = "http://localhost:5001/eventos";
                     var respuesta = await axios.post(url, {
                         nombre: nombre,
@@ -50,7 +55,7 @@ const CrearEvento = () => {
                         organizador: organizador,
                         lat: latitud,
                         lon: longitud,
-                        imagenes: imagenes
+                        imagen: imagenesRL[0]
 
                     });
                     alert("Evento creado");
@@ -66,19 +71,19 @@ const CrearEvento = () => {
                 <form>
                     <div className="mb-3">
                         <label htmlFor="nombre" className="form-label">Nombre del evento</label>
-                        <input type="text" className="form-control" id="nombre" />
+                        <input type="text" className="form-control" id="nombre" required />
                     </div>
                     <div className="mb-3">
                         <label htmlFor="lugar" className="form-label">Lugar</label>
-                        <input type="text" className="form-control" id="lugar" />
+                        <input type="text" className="form-control" id="lugar" required/>
                     </div>
                     <div className="mb-3">
                         <label htmlFor="fecha" className="form-label">Fecha</label>
-                        <input type="date" className="form-control" id="fecha" />
+                        <input type="date" className="form-control" id="fecha" required/>
                     </div>
                     <div className="mb-3">
                         <label htmlFor="hora" className="form-label">Hora</label>
-                        <input type="time" className="form-control" id="hora" />
+                        <input type="time" className="form-control" id="hora" required/>
                     </div>
                     <label htmlFor="imagenes" className="form-label">
                         Imágenes
